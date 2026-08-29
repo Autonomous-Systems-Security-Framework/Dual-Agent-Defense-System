@@ -36,7 +36,8 @@ class TestOpenPromptInjection:
     """Verify the Open Prompt Injection training dataset."""
 
     @pytest.fixture(scope="class")
-    def dataset(self):
+    @classmethod
+    def dataset(cls):
         return DatasetLoader.load_open_prompt_injection()
 
     def test_dataset_loads(self, dataset):
@@ -66,7 +67,8 @@ class TestNemotronAgenticInjection:
     """Verify the NVIDIA Nemotron training dataset."""
 
     @pytest.fixture(scope="class")
-    def dataset(self):
+    @classmethod
+    def dataset(cls):
         return DatasetLoader.load_nemotron_agentic_injection()
 
     def test_dataset_loads(self, dataset):
