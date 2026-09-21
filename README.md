@@ -1,41 +1,157 @@
-## Project Overview
+# Base Paper
 
-This project focuses on improving the security and reliability of LLM-based AI agents against prompt injection and indirect prompt injection attacks.
+## Paper Title
 
-Large Language Model (LLM) agents can interact with external data, tools, APIs, and applications. However, untrusted content can contain hidden or malicious instructions that may influence the agent and cause unintended actions. Previous research has demonstrated that indirect prompt injection can compromise LLM-integrated applications and affect tool usage, data access, and generated responses.
+**Not what you’ve signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection**
 
-The proposed system introduces a semantic verification layer to check whether an agent's proposed action is consistent with the user's original goal. Textual inputs such as the user's goal and the agent's proposed action are converted into dense vector embeddings. Their semantic similarity/divergence is then calculated to identify possible deviations.
+## Authors
 
-The system can be used as a verification layer before an agent performs an action:
+* Kai Greshake
+* Sahar Abdelnabi
+* Shailesh Mishra
+* Christoph Endres
+* Thorsten Holz
+* Mario Fritz
 
-User Goal → LLM Agent → Proposed Action → Semantic Verification → Allow / Reject
+## Publication Details
 
-The project is inspired by recent research on indirect prompt injection, multi-agent defense pipelines, AgentDojo evaluation, context-aware prompt injection defense, and LLM firewall/validator-agent architectures. These works highlight the need for stronger security mechanisms that verify agent behavior instead of relying only on input filtering.
+* **arXiv ID:** 2302.12173
+* **Version:** v2
+* **Category:** cs.CR — Cryptography and Security
+* **Date:** 5 May 2023
 
-### Key Objectives
+## Paper Link
 
-- Detect possible prompt injection and malicious instructions.
-- Convert goals and proposed actions into semantic embeddings.
-- Measure the semantic alignment between the user's goal and agent action.
-- Reject or flag actions that significantly deviate from the original goal.
-- Provide an additional security layer for LLM-based agents.
-- Improve the reliability and safety of tool-using AI agents.
+https://arxiv.org/abs/2302.12173
 
-### Basic Workflow
+## Abstract
 
-1. Receive the user's original goal.
-2. Generate a proposed action using the LLM agent.
-3. Convert both texts into vector embeddings.
-4. Calculate semantic similarity/divergence.
-5. Compare the result with a predefined threshold.
-6. Allow aligned actions and flag/reject suspicious actions.
-7. Log the verification result for analysis.
+Large Language Models (LLMs) are increasingly being integrated into applications that can access external data and interact with different tools and services. This creates new security risks because LLMs may not clearly distinguish between data and instructions.
 
-### References
+The paper introduces **Indirect Prompt Injection (IPI)**, a vulnerability in which an attacker places malicious instructions inside external data that is later retrieved and processed by an LLM-integrated application. The attacker does not need to directly interact with the target application.
 
-1. Greshake et al., *Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection*.
-2. Weng et al., *ARGUS: Defending LLM Agents Against Context-Aware Prompt Injection*.
-3. Hossain et al., *A Multi-Agent LLM Defense Pipeline Against Prompt Injection Attacks*.
-4. Debenedetti et al., *AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents*.
-5. Gulyamov et al., *Prompt Injection Attacks in Large Language Models and AI Agent Systems: A Comprehensive Review of Vulnerabilities, Attack Vectors, and Defense Mechanisms*.
-6. Podpora et al., *LLM Firewall Using Validator Agent for Prevention Against Prompt Injection Attacks*.
+The authors present a systematic analysis of the security threats caused by indirect prompt injection and demonstrate different attacks against synthetic applications as well as real-world LLM-integrated systems. The attacks can affect information confidentiality, application functionality, generated content, and system availability.
+
+## Introduction
+
+LLM-integrated applications can retrieve information from sources such as websites, documents, emails, and other external data. The retrieved information is then provided to the LLM to generate responses or perform actions.
+
+The main security problem identified in this paper is that the LLM may treat malicious instructions contained inside retrieved data as legitimate instructions. This allows an attacker to influence the behavior of the application without directly accessing or controlling the LLM.
+
+This type of attack is called **Indirect Prompt Injection (IPI)**.
+
+## What is Indirect Prompt Injection?
+
+**Indirect Prompt Injection** is an attack in which malicious instructions are embedded into external data that an LLM-based application is expected to retrieve and process.
+
+For example:
+
+1. An attacker creates a web page containing malicious instructions.
+2. An LLM application retrieves that web page.
+3. The malicious instructions become part of the retrieved content.
+4. The LLM interprets the instructions as part of its prompt.
+5. The application may perform an unintended action.
+
+Therefore, the attacker can influence the application **indirectly through the data it consumes**.
+
+## Threats Identified in the Paper
+
+The paper presents a taxonomy of threats associated with indirect prompt injection.
+
+### 1. Information Gathering
+
+Attackers may attempt to obtain sensitive information such as:
+
+* Personal information
+* Credentials
+* Private conversations
+* Application data
+
+### 2. Intrusion
+
+Injected instructions may attempt to influence application functionality, including:
+
+* Remote control
+* Persistence
+* Unauthorized API calls
+* Manipulation of application behavior
+
+### 3. Fraud
+
+IPI can potentially be used for:
+
+* Phishing
+* Scams
+* Masquerading
+* Misleading users
+
+### 4. Malware
+
+Malicious prompts can potentially be used to spread harmful instructions or malicious content through LLM-integrated systems.
+
+### 5. Manipulated Content
+
+An attacker may influence the content generated by the LLM, resulting in:
+
+* Incorrect summaries
+* Disinformation
+* Biased content
+* Hidden information
+* Unwanted advertisements or promotions
+
+### 6. Availability
+
+Attackers may attempt to reduce the availability or usefulness of an application by causing:
+
+* Excessive computation
+* Time-consuming operations
+* Disruption of search or application functionality
+
+## Injection Methods
+
+The paper discusses several ways in which malicious instructions can reach an LLM application, including:
+
+* Malicious websites
+* Social media content
+* Code repositories
+* Documents
+* Emails
+* User-provided content
+* Hidden instructions
+* Multi-stage payloads
+* Encoded prompts
+* Instructions embedded in images or generated through code
+
+## Experimental Evaluation
+
+The authors evaluate indirect prompt injection using both **synthetic applications and real-world LLM-integrated systems**.
+
+The experiments include applications with capabilities such as:
+
+* Search
+* Viewing web content
+* Retrieving URLs
+* Reading emails
+* Sending emails
+* Accessing address books
+* Memory-related functions
+
+The paper also demonstrates attacks against real-world systems including **Bing Chat powered by GPT-4** and **GitHub Copilot**.
+
+## Key Contributions
+
+The main contributions of the paper are:
+
+1. Introduction of **Indirect Prompt Injection (IPI)** as a security threat to LLM-integrated applications.
+2. Development of a systematic **taxonomy of IPI threats**.
+3. Demonstration of practical attacks against synthetic and real-world applications.
+4. Analysis of different attack methods and their potential impacts.
+5. Providing demonstrations and an open framework to support further security research.
+
+## Conclusion
+
+The paper demonstrates that integrating LLMs with external data and application tools introduces new security challenges. In particular, malicious instructions embedded in retrieved data can influence the behavior of LLM-integrated applications.
+
+The study shows that indirect prompt injection can have several impacts, including information leakage, unauthorized actions, manipulated content, fraud, malware propagation, and availability problems.
+
+The authors highlight the need for effective security mechanisms to protect LLM-integrated applications from these attacks.
