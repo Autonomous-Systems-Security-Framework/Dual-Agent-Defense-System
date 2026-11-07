@@ -1,16 +1,10 @@
-"""
-Unified Verification Suite for the Dual-Agent Defense System.
-
-Run with:
-
-    python -m pytest tests/test_env.py -v
-"""
 
 import sys
 
 import pytest
 from datasets import Dataset
 
+from src.core.tool_environment import ToolEnvironment
 from src.core.dataset_loader import (
     DatasetLoader,
     OPEN_PROMPT_INJECTION,
@@ -18,26 +12,113 @@ from src.core.dataset_loader import (
 )
 
 
+# ============================================================
+# SIMULATED TOOL ENVIRONMENT TESTS
+# ============================================================
+
+def test_read_document():
+    env = ToolEnvironment({
+        "doc1": "This is a sample document."
+    })
+
+    result = env.execute(
+        "read_document",
+        {"document_id": "doc1"}
+    )
+
+    assert result["status"] == "success"
+    assert result["content"] == "This is a sample document."
+
+
+def test_summarize_document():
+    env = ToolEnvironment({
+        "doc1": "A" * 300
+    })
+
+    result = env.execute(
+        "summarize_document",
+        {"document_id": "doc1"}
+    )
+
+    assert result["status"] == "success"
+    assert len(result["summary"]) == 200
+
+
+def test_simulated_email():
+    env = ToolEnvironment()
+
+    result = env.execute(
+        "send_email",
+        {
+            "recipient": "test@example.com",
+            "subject": "Test",
+            "body": "Hello"
+        }
+    )
+
+    assert result["status"] == "success"
+    assert len(env.action_log) == 1
+    assert env.action_log[0]["simulated"] is True
+
+
+def test_simulated_transfer():
+    env = ToolEnvironment()
+
+    env.execute(
+        "transfer_funds",
+        {
+            "recipient": "test_account",
+            "amount": 100
+        }
+    )
+
+    assert env.action_log[0]["amount"] == 100
+    assert env.action_log[0]["simulated"] is True
+
+
+def test_unknown_tool_rejected():
+    env = ToolEnvironment()
+
+    with pytest.raises(ValueError):
+        env.execute("unknown_tool", {})
+
+
+def test_invalid_transfer_rejected():
+    env = ToolEnvironment()
+
+    with pytest.raises(ValueError):
+        env.execute(
+            "transfer_funds",
+            {
+                "recipient": "test_account",
+                "amount": -100
+            }
+        )
+
+
+# ============================================================
+# PYTHON ENVIRONMENT TESTS
+# ============================================================
+
 class TestEnvironment:
-    """Verify that the required Python environment is available."""
 
     def test_python_version(self):
-        """Project requires Python 3.9 or newer."""
         assert sys.version_info >= (3, 9)
 
     def test_datasets_package(self):
-        """Verify that Hugging Face datasets is installed."""
         import datasets
 
         assert datasets.__version__
 
 
+# ============================================================
+# OPEN PROMPT INJECTION DATASET TESTS
+# ============================================================
+
 class TestOpenPromptInjection:
-    """Verify the Open Prompt Injection training dataset."""
 
     @pytest.fixture(scope="class")
-    @classmethod
-    def dataset(cls):
+    def dataset(self):
         return DatasetLoader.load_open_prompt_injection()
 
     def test_dataset_loads(self, dataset):
@@ -63,12 +144,14 @@ class TestOpenPromptInjection:
         assert dataset[0]["sample_id"] is not None
 
 
+# ============================================================
+# NEMOTRON AGENTIC INJECTION DATASET TESTS
+# ============================================================
+
 class TestNemotronAgenticInjection:
-    """Verify the NVIDIA Nemotron training dataset."""
 
     @pytest.fixture(scope="class")
-    @classmethod
-    def dataset(cls):
+    def dataset(self):
         return DatasetLoader.load_nemotron_agentic_injection()
 
     def test_dataset_loads(self, dataset):
