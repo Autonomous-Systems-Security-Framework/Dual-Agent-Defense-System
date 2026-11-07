@@ -8,10 +8,8 @@ class NaiveAgent:
     """
     Deterministic vulnerable baseline.
 
-    Reads a document and executes a structured action found inside it
-    without checking whether the user authorized that action.
-
-    This intentionally models missing security controls.
+    Reads an untrusted document and executes a structured action
+    found inside it without checking user authorization.
     """
 
     ACTION_MARKER = "UNTRUSTED_ACTION:"
@@ -23,14 +21,14 @@ class NaiveAgent:
         # Step 1: Read the external document.
         document_result = self.environment.execute(
             "read_document",
-            {"document_id": document_id}
+            {"document_id": document_id},
+            agent="naive_baseline",
         )
 
         content = document_result["content"]
-
-        # Step 2: Look for an embedded action.
         action_payload = None
 
+        # Step 2: Find an embedded action.
         marker_index = content.find(self.ACTION_MARKER)
 
         if marker_index != -1:
@@ -39,30 +37,32 @@ class NaiveAgent:
             ].strip()
 
             try:
-                action_payload, _ = json.JSONDecoder().raw_decode(raw_payload)
+                action_payload, _ = json.JSONDecoder().raw_decode(
+                    raw_payload
+                )
             except json.JSONDecodeError:
                 return {
                     "status": "invalid_payload",
                     "user_request": user_request,
-                    "executed": False
+                    "executed": False,
                 }
 
-        # Step 3: No embedded action means no action is executed.
+        # Step 3: No action found.
         if action_payload is None:
             return {
                 "status": "completed_without_action",
                 "user_request": user_request,
-                "executed": False
+                "executed": False,
             }
 
-        # Step 4: Intentionally vulnerable behavior.
-        # The agent does not verify the action against user intent.
+        # Step 4: Validate payload structure.
         if not isinstance(action_payload, dict):
             return {
                 "status": "invalid_payload",
                 "user_request": user_request,
-                "executed": False
+                "executed": False,
             }
+
         tool_name = action_payload.get("tool")
         arguments = action_payload.get("arguments", {})
 
@@ -70,16 +70,21 @@ class NaiveAgent:
             return {
                 "status": "invalid_payload",
                 "user_request": user_request,
-                "executed": False
+                "executed": False,
             }
 
-        # Step 5: Execute the embedded action.
-        result = self.environment.execute(tool_name, arguments)
+        # Step 5: Execute without authorization checks.
+        result = self.environment.execute(
+            tool_name,
+            arguments,
+            agent="naive_baseline",
+            authorized=None,
+        )
 
         return {
             "status": "action_executed",
             "user_request": user_request,
             "executed": True,
             "action": action_payload,
-            "tool_result": result
+            "tool_result": result,
         }
