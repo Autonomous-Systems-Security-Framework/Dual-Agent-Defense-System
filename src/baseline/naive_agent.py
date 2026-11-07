@@ -1,8 +1,6 @@
 
 import json
 
-from sympy import content
-
 from src.core.tool_environment import ToolEnvironment
 
 
@@ -59,6 +57,12 @@ class NaiveAgent:
 
         # Step 4: Intentionally vulnerable behavior.
         # The agent does not verify the action against user intent.
+        if not isinstance(action_payload, dict):
+            return {
+                "status": "invalid_payload",
+                "user_request": user_request,
+                "executed": False
+            }
         tool_name = action_payload.get("tool")
         arguments = action_payload.get("arguments", {})
 
